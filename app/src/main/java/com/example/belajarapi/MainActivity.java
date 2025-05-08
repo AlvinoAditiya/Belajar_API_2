@@ -23,21 +23,32 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView rvTeam;
     TeamAdapter adapter;
+    ProgressBar pbLoading;
 
     List<ItemModel> teamList = new ArrayList<>();
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         // Inisialisasi Recycler View
         rvTeam = findViewById(R.id.rvTeam);
+        pbLoading = findViewById(R.id.pbLoading);
         rvTeam.setLayoutManager(new LinearLayoutManager(this));
 
-        ApiInterface api = RetrofitClient.getInstance().create(ApiInterface.class);
-        Call<TeamRespon> call = api.getTeams("English Premier League");
 
+
+
+        // API Request berdasarkan liga
+        ApiInterface api = RetrofitClient.getInstance().create(ApiInterface.class);
+
+        String league = getIntent().getStringExtra("league");
+        Call<TeamRespon> call = api.getTeams(league); //
+
+        // Menjalankan request API
         call.enqueue(new Callback<TeamRespon>() {
             @Override
             public void onResponse(Call<TeamRespon> call, Response<TeamRespon> respon) {
@@ -45,7 +56,9 @@ public class MainActivity extends AppCompatActivity {
                     List<ItemModel> teams = respon.body().getTeams();
                         TeamAdapter TeamAdapter = new TeamAdapter(teams);
                     rvTeam.setAdapter(TeamAdapter);
+                    rvTeam.setVisibility(View.VISIBLE);
                 }
+                pbLoading.setVisibility(View.GONE);
             }
 
             @Override
